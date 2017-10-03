@@ -28,22 +28,6 @@ def read_board():
     return board
 
 
-# full_board: 9x9 matrix of ints and Nones
-# num_holes: int in the range 0 <= ... < 81
-# Returns a copy of <full_board> with <num_holes> elements set to None
-def random_puzzle(full_board, num_holes):
-    if num_holes < 0 or num_holes >= 81:
-        raise Exception('num_holes must be in the range 0 <= ... < 81')
-
-    result = copy.deepcopy(full_board)
-
-    for index1d in random.sample(range(81), num_holes):
-        x, y = divmod(index1d, 9)
-        result[x][y] = None
-
-    return result
-
-
 solved_board = [
     '5 3 4  6 7 8  9 1 2',
     '6 7 2  1 9 5  3 4 8',
@@ -60,3 +44,19 @@ solved_board = [
     list(map(int, line.split()))
     for line in solved_board
 ]
+
+
+# num_holes: int in the range 0 < ... <= 81
+# full_board: 9x9 matrix of ints and Nones
+# Returns a copy of <full_board> with <num_holes> elements set to None
+def random_puzzle(num_holes, full_board=solved_board):
+    if not (0 < num_holes and num_holes <= 81):
+        raise Exception('num_holes must be in the range 0 < ... <= 81')
+
+    result = copy.deepcopy(full_board)
+
+    for index1d in random.sample(range(81), num_holes):
+        x, y = divmod(index1d, 9)
+        result[x][y] = None
+
+    return result
