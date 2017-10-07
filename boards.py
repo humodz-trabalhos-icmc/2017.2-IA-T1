@@ -1,6 +1,7 @@
 import sys
 import random
 import copy
+import numpy as np
 
 
 # x: str containing and integer or '_'
@@ -40,16 +41,20 @@ solved_board = [
     '3 4 5  2 8 6  1 7 9',
 ]
 
-solved_board = [
+solved_board = np.array([
     list(map(int, line.split()))
     for line in solved_board
-]
+], dtype=object)
+
+
+def new_solved():
+    return copy.deepcopy(solved_board)
 
 
 # num_holes: int in the range 0 < ... <= 81
 # full_board: 9x9 matrix of ints and Nones
 # Returns a copy of <full_board> with <num_holes> elements set to None
-def random_puzzle(num_holes, full_board=solved_board):
+def generate_unsolved(num_holes, full_board=solved_board):
     if not (0 < num_holes and num_holes <= 81):
         raise Exception('num_holes must be in the range 0 < ... <= 81')
 
@@ -60,3 +65,12 @@ def random_puzzle(num_holes, full_board=solved_board):
         result[x][y] = None
 
     return result
+
+
+# Print board, replacing None with _
+def display(board):
+    for row in board:
+        for elem in row:
+            elem = elem or '_'
+            print(elem, end=' ')
+        print()
