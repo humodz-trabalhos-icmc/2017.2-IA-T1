@@ -6,63 +6,72 @@ import boards
 import domain
 
 
-
 # Verifica se no sudoku se tem algum None      
 def procura_none(board):
 	for i in range(0,9):
 		for j in range(0,9):
-			if board[i][j] == None: return True
+			if board[i][j] == None:
+				return True
 	return False
 
 # Procura o dominio com mais restricoes
 def max_restr(board):
 	dom_board = domain.cell_domains(board)
-	# tamanho maximo do dominio
+	# size: tamanho maximo de cada dominio
 	size = 9 
 	maxdom = {}
+	dominio = {}
 	for i in range(0,9):
 		for j in range(0,9): 
 			dom = dom_board[i][j]
 			t_aux = len(dom_board[i][j])
-			if (t_aux <= size) and (dom != {}):
-				size = t_aux 
-				indice = [i,j]
-				maxdom = dom
-				if(size == 1): return([indice,list(maxdom)])
+			# Verifica se o dominio nao eh igual a zero
+			if (dom != {}):
+				# Verifica se foi encontrado o menor
+				if(t_aux <= size):
+					size = t_aux 
+					indice = [i,j]
+					maxdom = dom
+					# Se o dominio encontrado eh o minimo pra preencher entao serve esse
+					if(size == 1): return([indice,list(maxdom)])
+				# Senao foi entao ficamos com esse
+				else:
+					dominio = dom
+					
 	# Se todos os dominio sao vazio entao o sudoku nao tem solucao			 
-	if(maxdom == {}):
+	if(maxdom == {}) and (dominio == {}):
 		return([[],[]])
-	else: return ([indice, list(maxdom)])
-
-
-def busca_cega(board):
+	elif(maxdom != {}): 
+		return ([indice, list(maxdom)])
+	else:
+		return ([indice, list(dominio)])
+		
+def busca_heuristica(sudoku):
 	# Verifica se o sudoku esta resolvido
-	#if(procura_none(board) == False):
-	#	print(board)
-    #    return
-    
-	[indice, dom] = max_restr(board)
+	if(procura_none(sudoku) == False):
+		# Print de cada solucao encontrada
+		print(sudoku)
+		return
+	
+	# Procurando o dominio com mais restricoes
+	[indice, dom] = max_restr(sudoku)
 	# Verifica se tem solucao
 	if([indice, dom] == [[],[]]):
 		print("O sudoku nao tem solucao")
 	else:
-		# Preenche o sudoku
-		for i in range(0,len(dom)):
-			#print(dom[i])
-            board[indice[0]][indice[1]] = dom[i]
-            busca_cega(board)
-		
+		# Preenche o sudoku 
+		for d in range(0,len(dom)):
+			sudoku[ indice[0] ][ indice[1] ] = dom[d]
+			busca_heuristica(sudoku)
 			
-        
-unsolved_board = numpy.array(boards.new_unsolved(45))
-# sudoku nao resolvido
-print(unsolved_board)
-# sudoku resolvido
+	# Volta ao valor vazio se nao achou nada		
+	sudoku[ indice[0] ][ indice[1] ] = None 
 
-## comeca a busca do inicio
-### Aqui poderia comecar procurando a celula que tem mais restricoes para comecar 
-solved_board = busca_cega(unsolved_board)
-print(solved_board)
-#print(domain.cell_domains(unsolved_board))
-#print(max_restr(unsolved_board))
+# Gerando um sudoku nao resolvido
+unsolved_board = numpy.array(boards.new_unsolved(45))
+
+print(unsolved_board)
+
+# Resolvendo o sudoku
+busca_heuristica(unsolved_board)
 
