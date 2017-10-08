@@ -34,7 +34,8 @@ def calculate_domains(board):
     return (row_domains, col_domains, block_domains)
 
 
-# domains: return value of calculate_domains()
+# Note: use cell_domains insted
+# all_domains: return value of calculate_domains()
 # return value: set
 def get_domain_at(row, col, all_domains):
     row_doms, col_doms, block_doms = all_domains
@@ -47,9 +48,12 @@ def get_domain_at(row, col, all_domains):
     return intersection
 
 
-# domains: return value of calculate_domains()
+# all_domains: (optional) return value of calculate_domains(board)
 # return value: 81x81 matrix of sets
-def cell_domains(board, all_domains):
+def cell_domains(board, all_domains=None):
+    if all_domains is None:
+        all_domains = calculate_domains(board)
+
     rowd, cold, blockd = all_domains
 
     result = np.empty((9, 9), dtype=object)
