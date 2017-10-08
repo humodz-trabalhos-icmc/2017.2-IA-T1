@@ -47,6 +47,24 @@ def get_domain_at(row, col, all_domains):
     return intersection
 
 
+# domains: return value of calculate_domains()
+# return value: 81x81 matrix of sets
+def cell_domains(board, all_domains):
+    rowd, cold, blockd = all_domains
+
+    result = np.empty((9, 9), dtype=object)
+
+    for x in range(9):
+        for y in range(9):
+            # insersection of domains
+            if board[x][y] is None:
+                result[x][y] = rowd[x] & cold[y] & blockd[x // 3][y // 3]
+            else:
+                result[x][y] = {}
+
+    return result
+
+
 # Split <board> into 3x3 matrix of blocks
 def block_split(board):
     # split board into 3 np.arrays, each containing 3 rows
@@ -59,3 +77,10 @@ def block_split(board):
     ]
 
     return blocks
+
+
+# Count number of valid state transitions from current board state
+# cell_doms: return value of cell_domains
+def count_paths(cell_doms):
+    fn = np.vectorize(len)
+    return np.sum(fn(cell_doms))
