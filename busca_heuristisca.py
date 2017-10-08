@@ -1,7 +1,7 @@
 import sys
 import random
 import copy
-import numpy
+import numpy as np
 import boards
 import domain
 
@@ -64,7 +64,7 @@ def busca_cega(r, c, possible_values):
         solved_board[r][c] = None  # Volto ao valor vazio
 
 
-solved_board = numpy.array(boards.generate_unsolved(45))
+solved_board = boards.new_unsolved(45)
 # sudoku nao resolvido
 print(solved_board)
 # sudoku resolvido

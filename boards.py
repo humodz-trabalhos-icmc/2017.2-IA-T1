@@ -54,7 +54,7 @@ def new_solved():
 # num_holes: int in the range 0 < ... <= 81
 # full_board: 9x9 matrix of ints and Nones
 # Returns a copy of <full_board> with <num_holes> elements set to None
-def generate_unsolved(num_holes, full_board=solved_board):
+def new_unsolved(num_holes, full_board=solved_board):
     if not (0 < num_holes and num_holes <= 81):
         raise Exception('num_holes must be in the range 0 < ... <= 81')
 
