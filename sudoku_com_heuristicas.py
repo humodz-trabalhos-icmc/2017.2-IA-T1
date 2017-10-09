@@ -1,4 +1,3 @@
-#<<< nao atualiza tab só os domínios
 import collections
 
 def combine(rows, cols): 
@@ -49,7 +48,6 @@ def init_domains(start_grid_str):
 	for sqr, val in start_grid_dict.items():
 		if val in DIGITS:
 			res = assign(domains, sqr, val) # se estiver preenchido, refletir isso no domínio e nos seus impactados
-			# <<<<< ver .com
 	return domains
 
 
@@ -64,6 +62,7 @@ def assign(domains, sqr, val):
 	else:
 		return False # atribuição quebra algum outro quadrado
 
+
 def eliminate(domains, sqr, val):
 	''' 
 		Remove um dado valor do domínio de um dado quadrado. 
@@ -74,7 +73,6 @@ def eliminate(domains, sqr, val):
 		return domains # não precisa fazer nada porque não alterou o domínio
 
 	domains[sqr] = domains[sqr].replace(val, '') # remove de fato
-	# <<< ver a questão da cópia
 	
 	# ======= FORWARD CHECKING =======
 	if len(domains[sqr]) == 0:
@@ -111,9 +109,26 @@ def mrv(domains):
 	return next_sqr
 
 
+def mrv_with_degree(domains):
+	''' 
+		Retorna o quadrado não-preechido de menor domínio.
+		Caso haja empate, escolhe-se aquele que impacta o maior número de quadrados vazios.
+	'''
+	possibilities_count = [(len(domains[sqr]), sqr) for sqr in ALL_SQUARES if len(domains[sqr]) > 1]
+	min_len_dom, next_sqr = min(possibilities_count)
+	
+	sqrs_w_min_poss = [sqr for num, sqr in possibilities_count if num == min_len_dom]  
+	if(len(sqrs_w_min_poss) == 1):
+		return next_sqr
+	
+	sqr_impact = [(len([s for s in impacted_peers[sqr] if len(domains[s]) > 1]), sqr) for sqr in sqrs_w_min_poss]
+	sqr_impact = sorted(sqr_impact, key = lambda i: -i[0])
+	return sqr_impact[0][1]
+
+
 def less_restrictive_value_seq(domains, sqr):
 	'''
-		Retorna o dígito que quando atribuído ao quadrado sqr afeta o menor número de quadrados.
+		Retorna valores do domínio do quadrado dado em ordem crescente de impacto sobre os outros quadrados.
 	'''
 	all_peer_domains = ''.join([domains[p] for p in impacted_peers[sqr]])
 	counts = collections.Counter(all_peer_domains)
@@ -133,7 +148,7 @@ def try_new_val(domains):
 	if all(len(domains[sqr]) == 1 for sqr in ALL_SQUARES): # todos os quadrados ficaram só com 1 opção
 		return domains, total_steps
 
-	chosen_sqr = mrv(domains)
+	chosen_sqr = mrv_with_degree(domains)
 	
 	for val in less_restrictive_value_seq(domains, chosen_sqr):
 		old_domains = domains.copy()
@@ -152,28 +167,6 @@ def try_new_val(domains):
 	return False, total_steps
 
 
-# >>>>>>>>>>>>>>>> Código bonito que o Hugo fez eu apagar! <<<<<<<<<<<<<<<
-
-# def try_new_val(domains):
-# 	if domains is False:
-# 		return False
-
-# 	if all(len(domains[sqr]) == 1 for sqr in ALL_SQUARES): # todos os quadrados ficaram só com 1 opção
-# 		return domains 
-
-# 	chosen_sqr = mrv(domains)
-	
-# 	for val in less_restrictive_value_seq(domains, chosen_sqr):
-# 		old_domains = domains.copy()
-# 		domains = try_new_val(assign(domains, chosen_sqr, val))
-# 		if domains is not False:
-# 			return domains
-# 		else:
-# 			domains = old_domains
-
-# 	return False
-
-
 def display(values):
     ''' 
     	Imprime o sudoku.
@@ -190,12 +183,13 @@ def display(values):
         if r in 'CF': print(line)
     print('\n')
 
+
 if __name__ == '__main__':
-	input = '.....6....59.....82....8....45........3........6..3.54...325..6..................'
+	sudoku_str = '.834.........7..5...........4.1.8..........27...3.....2.6.5....5.....8........1..'
 	
-	domains = init_domains(input)
+	domains = init_domains(sudoku_str)
 	result, n_steps = try_new_val(domains)
 	display(result)
-	print(n_steps)
+	print(str(n_steps) + ' passos até a solução')
 
 	
