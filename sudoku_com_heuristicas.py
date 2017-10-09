@@ -103,9 +103,7 @@ def mrv(domains):
 	''' 
 		Retorna o quadrado não-preechido de menor domínio.
 	'''
-	min_len_dom, next_sqr = min((len(domains[sqr]), sqr) for sqr in ALL_SQUARES if len(domains[sqr]) > 1) 
-
-	# << adicionar desempate por grau depois
+	min_len_dom, next_sqr = min((len(domains[sqr]), sqr) for sqr in ALL_SQUARES if len(domains[sqr]) > 1)
 	return next_sqr
 
 
