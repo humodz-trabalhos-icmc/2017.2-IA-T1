@@ -19,7 +19,7 @@ puzzle_count = 0
 for line in sys.stdin:
     puzzle_count += 1
 
-    line = line.replace('\n', '')
+    line = line.replace('\n', '').replace('\r', '')
     assert len(line) == 81, 'Linha de tamanho errado: {}.'.format(len(line))
 
     blind_result = blind.blind_search(line)
