@@ -103,7 +103,7 @@ def mrv(domains):
 	''' 
 		Retorna o quadrado não-preechido de menor domínio.
 	'''
-	min_len_dom, next_sqr = min((len(domains[sqr]), sqr) for sqr in ALL_SQUARES if len(domains[sqr]) > 1)
+	min_len_dom, next_sqr = min((len(domains[sqr]), sqr) for sqr in ALL_SQUARES if len(domains[sqr]) > 1) 
 	return next_sqr
 
 
@@ -140,11 +140,11 @@ def try_new_val(domains):
 		Encontra valores e variáveis em potencial e testa sua validade.
 		Retorna:
 			- Sudoku resolvido até o momento.
-			- Nº de passos dados.
+			- Nº de backtrackings realizados.
 	'''
-	total_steps = 0
-	if all(len(domains[sqr]) == 1 for sqr in ALL_SQUARES): # todos os quadrados ficaram só com 1 opção
-		return domains, total_steps
+	total_backs = 0 # número de backtracks realizados
+	if all(len(domains[sqr]) == 1 for sqr in ALL_SQUARES): # se todos os quadrados ficaram só com 1 opção
+		return domains, total_backs
 
 	chosen_sqr = mrv_with_degree(domains)
 	
@@ -153,41 +153,44 @@ def try_new_val(domains):
 		
 		domains = assign(domains, chosen_sqr, val)
 		if domains is not False:
-			domains, partial_steps = try_new_val(domains)
-			total_steps += partial_steps + 1
+			domains, partial_ste	ps = try_new_val(domains)
+			total_backs += partial_backs
 			if domains is not False:
-			 	return domains, total_steps
+			 	return domains, total_backs
 			else:
 				domains = old_domains
+				total_backs += 1
 		else:
 			domains = old_domains
 
-	return False, total_steps
+	return False, total_backs
 
 
-def display(values):
+def display(domains):
     ''' 
     	Imprime o sudoku.
     '''
-    if not values:
-    	print('False recebido por display(values)')
+    if not domains:
+    	print('False recebido por display(domains)')
     	return
 
-    width = 1 + max(len(values[s]) for s in ALL_SQUARES)
+    width = 1 + max(len(domains[s]) for s in ALL_SQUARES)
     line = '+'.join(['-'*(width*3)]*3)
     for r in ALL_ROWS:
-        print(''.join(values[r+c].center(width)+('|' if c in '36' else '')
+        print(''.join(domains[r+c].center(width)+('|' if c in '36' else '')
                       for c in ALL_COLS))
         if r in 'CF': print(line)
-    print('\n')
+    
 
-
-if __name__ == '__main__':
-	sudoku_str = '.834.........7..5...........4.1.8..........27...3.....2.6.5....5.....8........1..'
-	
+def solve_w_heuristics(sudoku_str):
+	'''
+		Recebe uma string de 81 caracteres contendo digitos e símbolos de vazio (0, . ou _)
+		Retorna o sudoku resolvido e o número de backtrackings realizados.
+	'''
 	domains = init_domains(sudoku_str)
-	result, n_steps = try_new_val(domains)
-	display(result)
-	print(str(n_steps) + ' passos até a solução')
+	return try_new_val(domains)
+
+
+
 
 	
