@@ -7,8 +7,8 @@ import blind
 # Usage:
 # python main.py < input.txt > output.csv
 
-print_header = True
-print_answer = (len(sys.argv) > 1 and sys.argv[1] == '--show')
+print_header = '--header' in sys.argv
+print_answer = '--show' in sys.argv
 
 
 if print_header:
