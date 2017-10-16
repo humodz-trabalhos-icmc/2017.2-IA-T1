@@ -27,7 +27,7 @@ for line in sys.stdin:
 
     b_board, b_backtracks = blind_result
     i_board, i_backtracks = informed_result
-    print(b_backtracks, i_backtracks)
+    print('{},{}'.format(b_backtracks, i_backtracks))
 
     if print_answer:
         print()
