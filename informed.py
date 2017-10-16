@@ -154,7 +154,7 @@ def try_new_val(domains):
 
 		domains = assign(domains, chosen_sqr, val)
 		if domains is not False:
-			domains, partial_steps = try_new_val(domains)
+			domains, partial_backs = try_new_val(domains)
 			total_backs += partial_backs
 			if domains is not False:
 			 	return domains, total_backs
