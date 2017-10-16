@@ -4,7 +4,7 @@ mkdir -p split_in/ split_out/
 split -l 20 input.txt split_in/
 
 for f in $(ls split_in); do
-	python main.py < split_in/$f > split_out/$f &
+	python3 main.py < split_in/$f > split_out/$f &
 done
 
 wait
