@@ -1,18 +1,38 @@
-import sudoku_com_heuristicas as sch
 import sys
 
-count = 0
-total_h = 0
+import informed
+import blind
+
+
+# Usage:
+# python main.py < input.txt > output.csv
+
+print_header = True
+print_answer = (len(sys.argv) > 1 and sys.argv[1] == '--show')
+
+
+if print_header:
+    print('blind,informed')
+
+puzzle_count = 0
+
 for line in sys.stdin:
-	line = line.replace('\n', '')
-	if len(line) != 81:
-		print('Erro: entrada inválida')
-		continue
-	result, n_back_h = sch.solve_w_heuristics(line)
-	count += 1
-	total_h += n_back_h
-	if len(sys.argv) > 1 and sys.argv[1] == '--show':
-		print()
-		sch.display(result)
-	print(str(n_back_h) + ' backtrackings realizados')
-print('Média : '+ str(total_h/count))
+    puzzle_count += 1
+
+    line = line.replace('\n', '')
+    assert len(line) == 81, 'Linha de tamanho errado: {}.'.format(len(line))
+
+    blind_result = blind.blind_search(line)
+    informed_result = informed.solve_w_heuristics(line)
+
+    b_board, b_backtracks = blind_result
+    i_board, i_backtracks = informed_result
+    print(b_backtracks, i_backtracks)
+
+    if print_answer:
+        print()
+        blind.display(b_board, file=sys.stderr)
+        print()
+        informed.display(i_board, file=sys.stderr)
+
+print('Total de casos:', puzzle_count, file=sys.stderr)

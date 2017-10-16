@@ -1,7 +1,8 @@
 import collections
+import sys
 
-def combine(rows, cols): 
-	'''Cria representações de todas as combinações 
+def combine(rows, cols):
+	'''Cria representações de todas as combinações
 		entre as linhas e as colunas inseritas '''
 	return [row + col for row in rows for col in cols]
 
@@ -21,16 +22,16 @@ impacted_units = dict((sqr, [unit for unit in ALL_UNITS if sqr in unit])
 					for sqr in ALL_SQUARES)
 
 # peers (colegas): quadrados impactados por um dado quadrado
-# dicionário que relaciona quadrado e os demais quadrados impactados pelo mesmo 
+# dicionário que relaciona quadrado e os demais quadrados impactados pelo mesmo
 impacted_peers = dict((sqr, set().union(*impacted_units[sqr])-set([sqr])) # todos os quadrados das suas units menos si mesmo
 					for sqr in ALL_SQUARES)
 
-def init_domains(start_grid_str): 
-	''' Recebe a string representando o 'tabuleiro' 
+def init_domains(start_grid_str):
+	''' Recebe a string representando o 'tabuleiro'
 		e devolve o dicionário que representa o domínio de cada quadrado.
 		{<quadrado>, <string com todos os dígitos possíveis>}
 		A fim de adiantar o resultado,
-		propaga-se imediatamente os dígitos fixos, 
+		propaga-se imediatamente os dígitos fixos,
 		resolvendo assim os quadrados que só apresentam 1 possibilidade desde o começo.
 	'''
 	# filtra qualquer caracter 'de enfeite',
@@ -39,8 +40,8 @@ def init_domains(start_grid_str):
 	if len(start_grid_ch_array) != 81:
 		print('Tabuleiro de tamanho inconsitente')
 		return False
-	
-	start_grid_dict = dict(zip(ALL_SQUARES, start_grid_ch_array)) # {<quadrado>, <valor inicial>} 
+
+	start_grid_dict = dict(zip(ALL_SQUARES, start_grid_ch_array)) # {<quadrado>, <valor inicial>}
 
 	domains = dict((sqr, DIGITS) for sqr in ALL_SQUARES) # inicia todos os quadrados com todos os dígitos sendo possíveis
 
@@ -56,7 +57,7 @@ def assign(domains, sqr, val):
 		Tenta atribuir um novo valor a um dado quadrado.
 		(Removendo o valor dos domínios dos quadrados de impacto)
 	'''
-	if all(eliminate(domains, sqr, diff_val) 
+	if all(eliminate(domains, sqr, diff_val)
 		for diff_val in domains[sqr] if diff_val != val): # se eliminar todas as outras possibilidade não quebrar nada
 			return domains # dicts são passados por referência, logo foi atualizado em eliminate()
 	else:
@@ -64,24 +65,24 @@ def assign(domains, sqr, val):
 
 
 def eliminate(domains, sqr, val):
-	''' 
-		Remove um dado valor do domínio de um dado quadrado. 
+	'''
+		Remove um dado valor do domínio de um dado quadrado.
 		Testa as consequências dessa remoção(forward checking).
-		Propaga as restrições de valores acabaram sendo atribuídos devido a essa remoção. 
+		Propaga as restrições de valores acabaram sendo atribuídos devido a essa remoção.
 	'''
 	if val not in domains[sqr]: # já não era uma possibilidade
 		return domains # não precisa fazer nada porque não alterou o domínio
 
 	domains[sqr] = domains[sqr].replace(val, '') # remove de fato
-	
+
 	# ======= FORWARD CHECKING =======
 	if len(domains[sqr]) == 0:
 		return False # alteração de domínio inválida pois quadrado fica sem opções
-	
+
 	# ===== PROPAGAÇÃO DE RESTRIÇÕES ====
 	# checa se só restou uma opção no quadrado (atribuição involuntária)
-	if len(domains[sqr]) == 1: 
-			final_val = domains[sqr] 
+	if len(domains[sqr]) == 1:
+			final_val = domains[sqr]
 			# forward checking dessa 'subatribuição'
 			if not all(eliminate(domains, peer, final_val)
 					for peer in impacted_peers[sqr]): # elimina valor atribuído de todos os afetados
@@ -100,25 +101,25 @@ def eliminate(domains, sqr, val):
 
 
 def mrv(domains):
-	''' 
+	'''
 		Retorna o quadrado não-preechido de menor domínio.
 	'''
-	min_len_dom, next_sqr = min((len(domains[sqr]), sqr) for sqr in ALL_SQUARES if len(domains[sqr]) > 1) 
+	min_len_dom, next_sqr = min((len(domains[sqr]), sqr) for sqr in ALL_SQUARES if len(domains[sqr]) > 1)
 	return next_sqr
 
 
 def mrv_with_degree(domains):
-	''' 
+	'''
 		Retorna o quadrado não-preechido de menor domínio.
 		Caso haja empate, escolhe-se aquele que impacta o maior número de quadrados vazios.
 	'''
 	possibilities_count = [(len(domains[sqr]), sqr) for sqr in ALL_SQUARES if len(domains[sqr]) > 1]
 	min_len_dom, next_sqr = min(possibilities_count)
-	
-	sqrs_w_min_poss = [sqr for num, sqr in possibilities_count if num == min_len_dom]  
+
+	sqrs_w_min_poss = [sqr for num, sqr in possibilities_count if num == min_len_dom]
 	if(len(sqrs_w_min_poss) == 1):
 		return next_sqr
-	
+
 	sqr_impact = [(len([s for s in impacted_peers[sqr] if len(domains[s]) > 1]), sqr) for sqr in sqrs_w_min_poss]
 	sqr_impact = sorted(sqr_impact, key = lambda i: -i[0])
 	return sqr_impact[0][1]
@@ -147,13 +148,13 @@ def try_new_val(domains):
 		return domains, total_backs
 
 	chosen_sqr = mrv_with_degree(domains)
-	
+
 	for val in less_restrictive_value_seq(domains, chosen_sqr):
 		old_domains = domains.copy()
-		
+
 		domains = assign(domains, chosen_sqr, val)
 		if domains is not False:
-			domains, partial_ste	ps = try_new_val(domains)
+			domains, partial_steps = try_new_val(domains)
 			total_backs += partial_backs
 			if domains is not False:
 			 	return domains, total_backs
@@ -166,8 +167,8 @@ def try_new_val(domains):
 	return False, total_backs
 
 
-def display(domains):
-    ''' 
+def display(domains, file=sys.stdout):
+    '''
     	Imprime o sudoku.
     '''
     if not domains:
@@ -178,9 +179,9 @@ def display(domains):
     line = '+'.join(['-'*(width*3)]*3)
     for r in ALL_ROWS:
         print(''.join(domains[r+c].center(width)+('|' if c in '36' else '')
-                      for c in ALL_COLS))
+                      for c in ALL_COLS), file=file)
         if r in 'CF': print(line)
-    
+
 
 def solve_w_heuristics(sudoku_str):
 	'''
@@ -193,4 +194,4 @@ def solve_w_heuristics(sudoku_str):
 
 
 
-	
+
